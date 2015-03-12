@@ -17,7 +17,7 @@ app.controller('mainController', function ($scope, $http){
   $scope.parse = function(){
   	$scope.parsing = true;
 
-  	//$http.get('/parse/' + $scope.url)
+  	//$http.post('/parse', $scope.url)
   	$http.get('https://api.myjson.com/bins/34luf')
   		.success(function(data){
   			console.log(data);
@@ -36,7 +36,7 @@ app.controller('mainController', function ($scope, $http){
   $scope.transformRecipe = function(){
   	$scope.transforming = true;
 
-  	//$http.get('/transform/' + $scope.transform)
+  	//$http.post('/transform/' + $scope.transform. $scope.recipe)
   	$http.get('https://api.myjson.com/bins/vdgn')
   		.success(function(data){
   			console.log(data);
