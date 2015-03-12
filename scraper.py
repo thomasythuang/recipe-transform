@@ -62,21 +62,24 @@ for i in range(0, length):
 	ingredient["measurement"] = " ".join(delimited) if len(delimited) > 0 else "none"
 
 	tokens = nltk.pos_tag(nltk.word_tokenize(ingredientNames[i].replace(",", "")))
-
+	numTokens = len(tokens)
 	name = []
 	desc = []
 	prep = []
 	prepDesc = []
+	n = 1
 
 	for value, tag in tokens:
-		if re.search("VB\w", tag) != "None":
+		if re.search("VB\w", tag) != None:
 			prep.append(value)
 		elif tag == "RB":
 			prepDesc.append(value)
-		elif tag == "JJ":
-			desc.append(value)
-		elif re.search("NN\w?", tag) != "None" or tag == "-NONE-":
+		elif n == numTokens:
 			name.append(value)
+		elif tag == "JJ" or re.search("NN\w?", tag) != None or tag == "-NONE-":
+			desc.append(value)
+
+		n += 1
 
 	ingredient["name"] = " ".join(name)
 	ingredient["descriptor"] = " ".join(desc) if len(desc) > 0 else "none"
@@ -111,8 +114,8 @@ tools = list(set(tools))
 data = {
 	"ingredients": ingredients,
 	"primary cooking method": methods.pop(frequencies.index(max(frequencies))),
-	"cooking method": " ".join(methods),
-	"cooking tools": " ".join(tools)
+	"cooking method": methods,
+	"cooking tools": tools
 }
 
 data_string = json.dumps(data)
