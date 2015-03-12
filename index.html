@@ -1,0 +1,148 @@
+<!doctype html>
+<html ng-app="recipesApp">
+  <head>
+    <title>My Angular App</title>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.12/angular.min.js"></script>
+    <script src="mainController.js"></script>
+    <link href="bootstrap-custom.css" rel="stylesheet">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    <link href="main.css" rel="stylesheet">
+  </head>
+
+  <body ng-controller="mainController">
+
+  	<nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Recipe Transformer</a>
+        </div>
+        <!-- 
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </div> -->
+      </div>
+    </nav>
+
+  	<div id="main" class="container">
+
+  		<div id="parser" ng-show="!parsing && step==1" class="col-lg-12">
+  			<h2>Step 1: Recipe Parsing</h2>
+  			<div class="form-group">
+  				<label for="url">Enter an Allrecipes.com URL</label>
+  				<input ng-model="url" class="form-control" id="url">
+  			</div>
+  			<button ng-click="parse()" class="btn btn-info">Submit</button>
+  		</div>
+
+  		<div class="centered" ng-show="parsing">
+  			<span class="fa fa-spinner fa-spin"></span>
+			</div>
+
+  		<div id="parsed" ng-show="step==2" class="col-lg-6">
+  			<h2>Step 2: The Recipe</h2>
+  			<p>Data from {{url}}</p>
+  			<button class="btn btn-primary" ng-click="goToStep(1)">Change recipes</button>
+  			<button class="btn btn-warning" ng-click="revert()">Revert to Original</button>
+
+  			<div class="centered" ng-show="transforming">
+	  			<span class="fa fa-spinner fa-spin"></span>
+				</div>
+
+  			<div ng-hide="transforming">
+	  			<h3>Ingredients</h3>
+	  			<div ng-repeat="ing in recipe.ingredients" class="ingredient">
+	  				{{ing.quantity}} {{ing.measurement}} of {{desc(ing.descriptor)}} {{ing.name}}
+	  			</div>
+
+	  			<h3>Tools Needed</h3>
+	  			<div ng-repeat="tool in recipe['cooking tools']" class="tool words-inline">
+	  				{{tool}}{{$last ? '' : ', '}}
+	  			</div>
+
+	  			<h3>Cooking Methods</h3>
+	  			<div ng-repeat="method in recipe['cooking methods']" class="method words-inline">
+	  				{{method}}{{$last ? '' : ', '}}
+	  			</div>
+
+	  			<h3>Primary Cooking Method</h3>
+	  			<div class="primary-method">{{recipe['primary cooking method']}}</div>
+  			</div>
+  		</div>
+
+  		<div id="pre-transform" ng-show="step==2" class="col-lg-6">
+  			<h2>Step 3: Transform</h2>
+
+  			<p>Transform the recipe to:</p>
+  			<div class="radio">
+				  <label>
+				    <input ng-model="transform" type="radio" name="transform" value="vegetarian" checked>
+				    Vegetarian
+				  </label>
+				</div>
+				<div class="radio">
+				  <label>
+				    <input ng-model="transform" type="radio" name="transform" value="lactose-free">
+				    Lactose Free
+				  </label>
+				</div>
+				<div class="radio">
+				  <label>
+				    <input ng-model="transform" type="radio" name="transform" value="healthy">
+				    Healthy (general)
+				  </label>
+				</div>
+				<div class="radio">
+				  <label>
+				    <input ng-model="transform" type="radio" name="transform" value="low-sodium">
+				    Low Sodium
+				  </label>
+				</div>
+				<p>or to a certain style:</p>
+				<div class="radio">
+				  <label>
+				    <input ng-model="transform" type="radio" name="transform" value="east-asian">
+				    East Asian
+				  </label>
+				</div>
+				<div class="radio">
+				  <label>
+				    <input ng-model="transform" type="radio" name="transform" value="indian">
+				    Indian
+				  </label>
+				</div>
+				<div class="radio">
+				  <label>
+				    <input ng-model="transform" type="radio" name="transform" value="american">
+				    American
+				  </label>
+				</div>
+				<div class="radio">
+				  <label>
+				    <input ng-model="transform" type="radio" name="transform" value="spanish">
+				    Spanish
+				  </label>
+				</div>
+				<div class="radio">
+				  <label>
+				    <input ng-model="transform" type="radio" name="transform" value="italian">
+				    Italian
+				  </label>
+				</div>
+
+				<button class="btn btn-info" ng-click="transformRecipe()">Transform!</button>
+  		</div>
+
+  	</div>
+
+  </body>
+</html>

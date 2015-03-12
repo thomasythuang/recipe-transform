@@ -1,0 +1,20 @@
+.centered{
+	text-align: center;
+}
+
+#main{
+	margin-top: 75px;
+}
+
+.fa-spinner{
+	font-size: 3em !important;
+}
+
+.words-inline{
+	display: inline-block;
+	margin-right: 10px;
+}
+
+.navbar-header{
+	margin-left: 15px !important;
+}
