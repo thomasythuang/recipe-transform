@@ -63,25 +63,19 @@ for i in range(0, length):
 
 	tokens = nltk.pos_tag(nltk.word_tokenize(ingredientNames[i].replace(",", "")))
 	numTokens = len(tokens)
-	name = []
 	desc = []
 	prep = []
 	prepDesc = []
-	n = 1
 
 	for value, tag in tokens:
 		if re.search("VB\w", tag) != None:
 			prep.append(value)
 		elif tag == "RB":
 			prepDesc.append(value)
-		elif n == numTokens:
-			name.append(value)
 		elif tag == "JJ" or re.search("NN\w?", tag) != None or tag == "-NONE-":
 			desc.append(value)
 
-		n += 1
-
-	ingredient["name"] = " ".join(name)
+	ingredient["name"] = desc.pop(len(desc) - 1)
 	ingredient["descriptor"] = " ".join(desc) if len(desc) > 0 else "none"
 	ingredient["preparation"] = " ".join(prep) if len(prep) > 0 else "none"
 	ingredient["prep-description"] = " ".join(prepDesc) if len(prepDesc) > 0 else "none"
