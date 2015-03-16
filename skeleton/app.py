@@ -5,7 +5,7 @@ from flask import Flask
 from flask import render_template, request, jsonify, make_response, Response, flash, redirect, session, url_for, g
 from flask.ext.pymongo import PyMongo
 from skeleton import config
-import os, json, sys, requests, nltk, re, string
+import os, json, sys, requests, nltk, re, string, time
 from lxml import html
 from itertools import groupby
 from fractions import Fraction
@@ -95,25 +95,19 @@ def store_recipe():
 
 		tokens = nltk.pos_tag(nltk.word_tokenize(ingredientNames[i].replace(",", "")))
 		numTokens = len(tokens)
-		name = []
 		desc = []
 		prep = []
 		prepDesc = []
-		n = 1
 
 		for value, tag in tokens:
 			if re.search("VB\w", tag) != None:
 				prep.append(value)
 			elif tag == "RB":
 				prepDesc.append(value)
-			elif n == numTokens:
-				name.append(value)
 			elif tag == "JJ" or re.search("NN\w?", tag) != None or tag == "-NONE-":
 				desc.append(value)
 
-			n += 1
-
-		ingredient["name"] = " ".join(name)
+		ingredient["name"] = desc.pop(len(desc) - 1)
 		ingredient["descriptor"] = " ".join(desc) if len(desc) > 0 else "none"
 		ingredient["preparation"] = " ".join(prep) if len(prep) > 0 else "none"
 		ingredient["prep-description"] = " ".join(prepDesc) if len(prepDesc) > 0 else "none"
@@ -148,7 +142,8 @@ def store_recipe():
 		"primary cooking method": methods.pop(frequencies.index(max(frequencies))),
 		"cooking method": methods,
 		"cooking tools": tools,
-		"url": url
+		"url": url,
+		"time": int(time.time())
 	}
 
 	data_string = json.dumps(data)
@@ -159,13 +154,23 @@ def store_recipe():
 @app.route('/transform_recipe', methods=['POST'])
 def tranform_recipe():
 	url = request.form['recipe_url']
-	transform = request.form['transform']
+	#transform = request.form['transform']
 
 	recipe = mongo.db.recipes.find_one({"url": url})
 
 	for ingredient in recipe["ingredients"]:
 		print ingredient["name"]
+
+	knowledge_base = load_knowledge_base()
+	print knowledge_base["ingredients"]['fruits-veggies']
+
+	for ingredient_group in knowledge_base['ingredients']:
+		for ingredient in knowledge_base['ingredients'][ingredient_group]:
+			if ingredient['name'] in [x['name'] for x in recipe['ingredients']]:
+				print ingredient['name'] + " is a match!"
+
 	return json.dumps(recipe, sort_keys=True, indent=4, default=json_util.default)
+
 
 @app.route('/class/<class_id>')
 def show_class(class_id):
@@ -175,6 +180,21 @@ def show_class(class_id):
 
 
 	return render_template('class.html', course=classShown, lessons=classLessons)
+
+def load_knowledge_base():
+	SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
+	json_url = os.path.join(SITE_ROOT, "static", "kb.json")
+	with open(json_url) as json_file:
+	    json_data = json.load(json_file)
+
+	print "Number of proteins: %s" % str(len(json_data['ingredients']['proteins']))
+	print "Number of fruits-veggies: %s" % str(len(json_data['ingredients']['fruits-veggies']))
+	print "Number of oils: %s" % str(len(json_data['ingredients']['oils']))
+	print "Number of grains: %s" % str(len(json_data['ingredients']['grains']))
+	print "Number of dairy: %s" % str(len(json_data['ingredients']['dairy']))
+	
+	return json_data
+
 
 # Example of ajax route that returns JSON
 @app.route('/_add_numbers')
