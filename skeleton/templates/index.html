@@ -53,6 +53,7 @@
   			<p>Data from <a ng-href="{{url}}" target="_blank">{{url}}</a></p>
   			<button class="btn btn-primary" ng-click="goToStep(1)">Change recipes</button>
   			<button class="btn btn-warning" ng-click="revert()">Revert to Original</button>
+  			<button class="btn btn-default" ng-click="test()">Test</button>
 
   			<div class="centered" ng-show="transforming">
 	  			<span class="fa fa-spinner fa-spin"></span>
@@ -70,7 +71,7 @@
 	  			</div>
 
 	  			<h3>Cooking Methods</h3>
-	  			<div ng-repeat="method in recipe['cooking methods']" class="method words-inline">
+	  			<div ng-repeat="method in recipe['cooking method']" class="method words-inline">
 	  				{{method}}{{$last ? '' : ', '}}
 	  			</div>
 

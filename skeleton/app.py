@@ -72,7 +72,9 @@ def welcome():
 def store_recipe():
 
 
-	url = request.form['recipe_url']
+	#url = request.form['recipe_url']
+	data = json.loads(request.data.decode())
+	url = data['recipe_url']
 	print url
 	
 
@@ -153,8 +155,12 @@ def store_recipe():
 
 @app.route('/transform_recipe', methods=['POST'])
 def tranform_recipe():
-	url = request.form['recipe_url']
-	transform = request.form['transform']
+
+	data = json.loads(request.data.decode())
+	url = data['recipe_url']
+	transform = data['transform']
+	#url = request.form['recipe_url']
+	#transform = request.form['transform']
 
 	recipe = mongo.db.recipes.find_one({"url": url})
 

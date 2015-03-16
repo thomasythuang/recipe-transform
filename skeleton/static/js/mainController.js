@@ -11,14 +11,14 @@ app.controller('mainController', function ($scope, $http){
   $scope.transforming = false;	// Transforming in progress?
 
   $scope.test = function(){
-  	console.log($scope.transform);
+  	console.log($scope.recipe);
   }
 
   $scope.parse = function(){
   	$scope.parsing = true;
 
-  	//$http.post('/parse/', $scope.url)
-  	$http.get('https://api.myjson.com/bins/34luf')
+  	$http.post('/store_recipe', {recipe_url: $scope.url})
+  	//$http.get('https://api.myjson.com/bins/34luf')
   		.success(function(data){
   			console.log(data);
   			$scope.recipe = data;
@@ -26,6 +26,7 @@ app.controller('mainController', function ($scope, $http){
   			$scope.step = 2;
   		})
   		.error(function(data, status, headers, config){
+        console.log(data);
   			console.log(status);
   			alert("The URL was invalid, try another");
   		}); 
@@ -36,8 +37,8 @@ app.controller('mainController', function ($scope, $http){
   $scope.transformRecipe = function(){
   	$scope.transforming = true;
 
-  	//$http.post('/transform/' + $scope.transform, $scope.recipe)
-  	$http.get('https://api.myjson.com/bins/vdgn')
+  	$http.post('/transform_recipe', {recipe_url: $scope.recipe, transform: $scope.transform})
+  	//$http.get('https://api.myjson.com/bins/vdgn')
   		.success(function(data){
   			console.log(data);
   			$scope.recipe = data;
