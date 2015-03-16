@@ -73,7 +73,7 @@ def store_recipe():
 
 
 	#url = request.form['recipe_url']
-	data = json.loads(request.data.decode())
+	data = json.loads(request.data.decode('utf8'))
 	url = data['recipe_url']
 	print url
 	
@@ -156,7 +156,7 @@ def store_recipe():
 @app.route('/transform_recipe', methods=['POST'])
 def tranform_recipe():
 
-	data = json.loads(request.data.decode())
+	data = json.loads(request.data.decode('utf8'))
 	url = data['recipe_url']
 	transform = data['transform']
 	#url = request.form['recipe_url']
