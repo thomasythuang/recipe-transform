@@ -37,9 +37,10 @@ app.controller('mainController', function ($scope, $http){
   $scope.transformRecipe = function(){
   	$scope.transforming = true;
 
-  	$http.post('/transform_recipe', {recipe_url: $scope.recipe, transform: $scope.transform})
+  	$http.post('/transform_recipe', {recipe_url: $scope.url, transform: $scope.transform})
   	//$http.get('https://api.myjson.com/bins/vdgn')
   		.success(function(data){
+        console.log('success');
   			console.log(data);
   			$scope.recipe = data;
   		})
