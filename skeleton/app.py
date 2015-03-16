@@ -154,7 +154,7 @@ def store_recipe():
 @app.route('/transform_recipe', methods=['POST'])
 def tranform_recipe():
 	url = request.form['recipe_url']
-	#transform = request.form['transform']
+	transform = request.form['transform']
 
 	recipe = mongo.db.recipes.find_one({"url": url})
 
@@ -167,7 +167,31 @@ def tranform_recipe():
 	for ingredient_group in knowledge_base['ingredients']:
 		for ingredient in knowledge_base['ingredients'][ingredient_group]:
 			if ingredient['name'] in [x['name'] for x in recipe['ingredients']]:
+				# the ingredient exists in our knowledge base!!
 				print ingredient['name'] + " is a match!"
+				# check if the ingredient has the boolean we are transforming too
+				if ingredient.has_key(transform) and ingredient[transform] == False:
+					# we need to change this ingredient!
+					print "let's transform this"
+					#loop through ingredient group, grab first one that matches
+					new_ingredient = ""
+					old_ingredient = ingredient['name']
+					for ingredient in knowledge_base['ingredients'][ingredient_group]:
+						if ingredient[transform] == True:
+							new_ingredient = ingredient['name']
+							break
+
+					print new_ingredient
+					print " old ingredient %s" % old_ingredient
+
+					# loop through recipe ingredients and update it 
+					for recipe_ingredient in recipe['ingredients']:
+						print recipe_ingredient['name']
+						if recipe_ingredient['name'] == old_ingredient:
+							recipe_ingredient['name'] = new_ingredient
+							recipe_ingredient['descriptor'] = ""
+
+
 
 	return json.dumps(recipe, sort_keys=True, indent=4, default=json_util.default)
 
