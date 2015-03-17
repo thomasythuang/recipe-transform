@@ -76,45 +76,48 @@ def store_recipe():
 	data = json.loads(request.data.decode('utf8'))
 	url = data['recipe_url']
 	print url
-	
 
 	page = requests.get(url)
-	tree = html.fromstring(page.text)
+tree = html.fromstring(page.text)
 
-	ingredientAmounts = tree.xpath("//span[@id='lblIngAmount']/text()")
-	ingredientNames = tree.xpath("//span[@id='lblIngName']/text()")
-	directions = " ".join(tree.xpath("//span[@class='plaincharacterwrap break']/text()"))
+ingredientInfo = [];
+listItems = tree.xpath("//li[@id='liIngredient']");
+for listItem in listItems:
+	ingredientInfo.append(listItem.xpath("./label/p/span/text()"))
+directions = " ".join(tree.xpath("//span[@class='plaincharacterwrap break']/text()"))
 
-	ingredients = []
-	length = len(ingredientAmounts)
+ingredients = []
+length = len(ingredientInfo)
 
-	for i in range(0, length):
-		ingredient = {}
+for i in range(0, length):
+	ingredient = {}
 
-		delimited = ingredientAmounts[i].split(" ")
-		ingredient["quantity"] = float(sum(Fraction(s) for s in delimited.pop(0).split()))
-		ingredient["measurement"] = " ".join(delimited) if len(delimited) > 0 else "none"
-
-		tokens = nltk.pos_tag(nltk.word_tokenize(ingredientNames[i].replace(",", "")))
-		numTokens = len(tokens)
-		desc = []
-		prep = []
-		prepDesc = []
-
+	current = ingredientInfo[i]
+	name = current.pop(len(current) - 1)
+	tokens = nltk.pos_tag(nltk.word_tokenize(name.replace(",", "")))
+	numTokens = len(tokens)
+	desc = []
+	prep = []
+	prepDesc = []
+	if len(tokens) > 0:
 		for value, tag in tokens:
-			if re.search("VB\w", tag) != None:
+			if re.search("VB(?!G)", tag) != None:
 				prep.append(value)
 			elif tag == "RB":
 				prepDesc.append(value)
-			elif tag == "JJ" or re.search("NN\w?", tag) != None or tag == "-NONE-":
+			elif tag == "JJ" or tag == "VBG" or re.search("NN\w?", tag) != None or tag == "-NONE-":
 				desc.append(value)
-
 		ingredient["name"] = desc.pop(len(desc) - 1)
 		ingredient["descriptor"] = " ".join(desc) if len(desc) > 0 else "none"
 		ingredient["preparation"] = " ".join(prep) if len(prep) > 0 else "none"
 		ingredient["prep-description"] = " ".join(prepDesc) if len(prepDesc) > 0 else "none"
 
-		ingredients.append(ingredient)
+	if len(current) > 0:
+		delimited = current[0].split(" ")
+		ingredient["quantity"] = float(sum(Fraction(s) for s in delimited.pop(0).split()))
+		ingredient["measurement"] = " ".join(delimited) if len(delimited) > 0 else "none"
+
+	ingredients.append(ingredient)
 
 	methods = []
 	tools = []
