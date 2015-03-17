@@ -127,15 +127,14 @@ for ingredient_group in knowledge_base['ingredients']:
 				# we need to change this ingredient!
 				print "let's transform this"
 				#loop through ingredient group, grab first one that matches
-				new_ingredient = ""
+				new_ingredient_list = []
 				old_ingredient = ingredient['name']
 				for ingredient in knowledge_base['ingredients'][ingredient_group]:
 					if ingredient[transform] == True:
-						new_ingredient = ingredient['name']
-						break
+						new_ingredient_list.append(ingredient['name'])
 
-				if new_ingredient != "":
-					print new_ingredient
+				if len(new_ingredient_list) > 0:
+					new_ingredient = random.choice(new_ingredient_list)
 					print " old ingredient %s" % old_ingredient
 
 					# loop through recipe ingredients and update it 
@@ -144,6 +143,8 @@ for ingredient_group in knowledge_base['ingredients']:
 						if recipe_ingredient['name'] == old_ingredient:
 							recipe_ingredient['name'] = new_ingredient
 							recipe_ingredient['descriptor'] = ""
+
+
 	print recipe
 	return recipe
 

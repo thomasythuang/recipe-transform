@@ -497,8 +497,9 @@
 		{"name":"wheat germ","veggie":true,"meat":false,"healthy":true,"low-sodium":true,"lactose-free":true,"east-asian":false,"indian":false,"spanish":false,"american":false,"italian":true,"none":false},
 		{"name":"corn husks","veggie":true,"meat":false,"healthy":true,"low-sodium":true,"lactose-free":true,"east-asian":false,"indian":false,"spanish":true,"american":false,"italian":false,"none":false}
 		],
-	"dairy": [
+	"cheese": [
 		{"name":"american cheese","veggie":false,"meat":true,"healthy":false,"low-sodium":false,"lactose-free":false,"east-asian":false,"indian":false,"spanish":false,"american":false,"italian":false,"none":false},
+		{"name":"cheese","veggie":false,"meat":true,"healthy":false,"low-sodium":false,"lactose-free":false,"east-asian":false,"indian":false,"spanish":false,"american":false,"italian":false,"none":false},
 		{"name":"cheddar cheese","veggie":false,"meat":true,"healthy":false,"low-sodium":false,"lactose-free":false,"east-asian":false,"indian":false,"spanish":true,"american":true,"italian":true,"none":false},
 		{"name":"feta cheese","veggie":false,"meat":true,"healthy":true,"low-sodium":true,"lactose-free":false,"east-asian":false,"indian":false,"spanish":false,"american":false,"italian":false,"none":false},
 		{"name":"string cheese","veggie":false,"meat":true,"healthy":true,"low-sodium":true,"lactose-free":false,"east-asian":false,"indian":false,"spanish":false,"american":false,"italian":false,"none":false},
@@ -526,7 +527,9 @@
 		{"name":"queso asadero","veggie":false,"meat":true,"healthy":false,"low-sodium":false,"lactose-free":false,"east-asian":false,"indian":false,"spanish":true,"american":false,"italian":false,"none":false},
 		{"name":"soy-based cheese","veggie":false,"meat":true,"healthy":true,"low-sodium":false,"lactose-free":true,"east-asian":false,"indian":false,"spanish":true,"american":true,"italian":true,"none":false},
 		{"name":"parmesan cheese","veggie":false,"meat":true,"healthy":true,"low-sodium":false,"lactose-free":true,"east-asian":false,"indian":false,"spanish":true,"american":true,"italian":true,"none":false},
-		{"name":"asiago cheese","veggie":false,"meat":true,"healthy":true,"low-sodium":false,"lactose-free":true,"east-asian":false,"indian":false,"spanish":true,"american":true,"italian":true,"none":false},
+		{"name":"asiago cheese","veggie":false,"meat":true,"healthy":true,"low-sodium":false,"lactose-free":true,"east-asian":false,"indian":false,"spanish":true,"american":true,"italian":true,"none":false}
+		],
+	"milk":[
 		{"name":"low-fat milk","veggie":true,"meat":false,"healthy":true,"low-sodium":true,"lactose-free":false,"east-asian":false,"indian":false,"spanish":false,"american":true,"italian":false,"none":false},
 		{"name":"fat-free milk","veggie":true,"meat":false,"healthy":true,"low-sodium":true,"lactose-free":false,"east-asian":true,"indian":true,"spanish":true,"american":true,"italian":true,"none":false},
 		{"name":"2% milk","veggie":true,"meat":false,"healthy":false,"low-sodium":true,"lactose-free":false,"east-asian":true,"indian":true,"spanish":true,"american":true,"italian":true,"none":false},

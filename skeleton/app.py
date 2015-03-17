@@ -5,7 +5,7 @@ from flask import Flask
 from flask import render_template, request, jsonify, make_response, Response, flash, redirect, session, url_for, g
 from flask.ext.pymongo import PyMongo
 from skeleton import config
-import os, json, sys, requests, nltk, re, string, time
+import os, json, sys, requests, nltk, re, string, time, random
 from lxml import html
 from itertools import groupby
 from fractions import Fraction
@@ -59,12 +59,6 @@ def welcome():
 	with open(json_url) as json_file:
 	    json_data = json.load(json_file)
 
-	print "Number of proteins: %s" % str(len(json_data['ingredients']['proteins']))
-	print "Number of fruits-veggies: %s" % str(len(json_data['ingredients']['fruits-veggies']))
-	print "Number of oils: %s" % str(len(json_data['ingredients']['oils']))
-	print "Number of grains: %s" % str(len(json_data['ingredients']['grains']))
-	print "Number of dairy: %s" % str(len(json_data['ingredients']['dairy']))
-	print json_data['prep-tools']
 	return render_template('index.html')
 
 
@@ -175,15 +169,14 @@ def tranform_recipe():
 					# we need to change this ingredient!
 					print "let's transform this"
 					#loop through ingredient group, grab first one that matches
-					new_ingredient = ""
+					new_ingredient_list = []
 					old_ingredient = ingredient['name']
 					for ingredient in knowledge_base['ingredients'][ingredient_group]:
 						if ingredient[transform] == True:
-							new_ingredient = ingredient['name']
-							break
+							new_ingredient_list.append(ingredient['name'])
 
-					if new_ingredient != "":
-						print new_ingredient
+					if len(new_ingredient_list) > 0:
+						new_ingredient = random.choice(new_ingredient_list)
 						print " old ingredient %s" % old_ingredient
 
 						# loop through recipe ingredients and update it 
@@ -208,7 +201,7 @@ def load_knowledge_base():
 	print "Number of fruits-veggies: %s" % str(len(json_data['ingredients']['fruits-veggies']))
 	print "Number of oils: %s" % str(len(json_data['ingredients']['oils']))
 	print "Number of grains: %s" % str(len(json_data['ingredients']['grains']))
-	print "Number of dairy: %s" % str(len(json_data['ingredients']['dairy']))
+	# print "Number of dairy: %s" % str(len(json_data['ingredients']['dairy']))
 	
 	return json_data
 
