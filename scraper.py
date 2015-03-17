@@ -87,37 +87,84 @@ for i in range(0, length):
 
 	ingredients.append(ingredient)
 
-print ingredients
-# methods = []
-# tools = []
-# exclude = set(string.punctuation)
-# directions = directions.replace("-", " ")
-# directions = "".join(char for char in directions if char not in exclude)
-# tokens = nltk.word_tokenize(directions)
-# for token in tokens:
-# 	token = token.lower()
-# 	try:
-# 		if COMMANDS.index(token):
-# 			methods.append(token)
-# 	except Exception:
-# 		pass
-# 	try:
-# 		if TOOLS.index(token):
-# 			tools.append(token)
-# 	except Exception:
-# 		pass
+methods = []
+tools = []
+exclude = set(string.punctuation)
+directions = directions.replace("-", " ")
+directions = "".join(char for char in directions if char not in exclude)
+tokens = nltk.word_tokenize(directions)
+for token in tokens:
+	token = token.lower()
+	try:
+		if COMMANDS.index(token):
+			methods.append(token)
+	except Exception:
+		pass
+	try:
+		if TOOLS.index(token):
+			tools.append(token)
+	except Exception:
+		pass
 
-# frequencies = [len(list(group)) for key, group in groupby(sorted(methods))]
-# methods = sorted(list(set(methods)))
-# tools = list(set(tools))
+frequencies = [len(list(group)) for key, group in groupby(sorted(methods))]
+methods = sorted(list(set(methods)))
+tools = list(set(tools))
 
-# data = {
-# 	"ingredients": ingredients,
-# 	"primary cooking method": methods.pop(frequencies.index(max(frequencies))),
-# 	"cooking method": methods,
-# 	"cooking tools": tools
-# }
+data = {
+	"ingredients": ingredients,
+	"primary cooking method": methods.pop(frequencies.index(max(frequencies))),
+	"cooking method": methods,
+	"cooking tools": tools
+}
 
-# data_string = json.dumps(data)
+data_string = json.dumps(data)
+recipe = data_string
 
-# print('ENCODED:', data_string)
+knowledge_base = load_knowledge_base()
+
+for ingredient_group in knowledge_base['ingredients']:
+	for ingredient in knowledge_base['ingredients'][ingredient_group]:
+		if ingredient['name'] in [x['name'] for x in recipe['ingredients']]:
+			# the ingredient exists in our knowledge base!!
+			print ingredient['name'] + " is a match!"
+			# check if the ingredient has the boolean we are transforming too
+			if ingredient.has_key(transform) and ingredient[transform] == False:
+				# we need to change this ingredient!
+				print "let's transform this"
+				#loop through ingredient group, grab first one that matches
+				new_ingredient_list = []
+				old_ingredient = ingredient['name']
+				for ingredient in knowledge_base['ingredients'][ingredient_group]:
+					if ingredient[transform] == True:
+						new_ingredient_list.append(ingredient['name'])
+
+				if len(new_ingredient_list) > 0:
+					new_ingredient = random.choice(new_ingredient_list)
+					print " old ingredient %s" % old_ingredient
+
+					# loop through recipe ingredients and update it 
+					for recipe_ingredient in recipe['ingredients']:
+						print recipe_ingredient['name']
+						if recipe_ingredient['name'] == old_ingredient:
+							recipe_ingredient['name'] = new_ingredient
+							recipe_ingredient['descriptor'] = ""
+
+
+	print recipe
+	return recipe
+
+def load_knowledge_base():
+	SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
+	json_url = os.path.join(SITE_ROOT, "static", "kb.json")
+	with open(json_url) as json_file:
+	    json_data = json.load(json_file)
+
+	print "Number of proteins: %s" % str(len(json_data['ingredients']['proteins']))
+	print "Number of fruits-veggies: %s" % str(len(json_data['ingredients']['fruits-veggies']))
+	print "Number of oils: %s" % str(len(json_data['ingredients']['oils']))
+	print "Number of grains: %s" % str(len(json_data['ingredients']['grains']))
+	print "Number of dairy: %s" % str(len(json_data['ingredients']['dairy']))
+	
+	return json_data
+
+print('ENCODED:', data_string)
