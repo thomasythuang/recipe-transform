@@ -163,12 +163,7 @@ def tranform_recipe():
 	#transform = request.form['transform']
 
 	recipe = mongo.db.recipes.find_one({"url": url})
-
-	for ingredient in recipe["ingredients"]:
-		print ingredient["name"]
-
 	knowledge_base = load_knowledge_base()
-	print knowledge_base["ingredients"]['fruits-veggies']
 
 	for ingredient_group in knowledge_base['ingredients']:
 		for ingredient in knowledge_base['ingredients'][ingredient_group]:
@@ -187,29 +182,21 @@ def tranform_recipe():
 							new_ingredient = ingredient['name']
 							break
 
-					print new_ingredient
-					print " old ingredient %s" % old_ingredient
+					if new_ingredient != "":
+						print new_ingredient
+						print " old ingredient %s" % old_ingredient
 
-					# loop through recipe ingredients and update it 
-					for recipe_ingredient in recipe['ingredients']:
-						print recipe_ingredient['name']
-						if recipe_ingredient['name'] == old_ingredient:
-							recipe_ingredient['name'] = new_ingredient
-							recipe_ingredient['descriptor'] = ""
+						# loop through recipe ingredients and update it 
+						for recipe_ingredient in recipe['ingredients']:
+							print recipe_ingredient['name']
+							if recipe_ingredient['name'] == old_ingredient:
+								recipe_ingredient['name'] = new_ingredient
+								recipe_ingredient['descriptor'] = ""
 
 
 
 	return json.dumps(recipe, sort_keys=True, indent=4, default=json_util.default)
 
-
-@app.route('/class/<class_id>')
-def show_class(class_id):
-
-	classShown = db.session.query(Class).filter_by(id=class_id).first()
-	classLessons = db.session.query(Lesson).filter_by(class_id=class_id)
-
-
-	return render_template('class.html', course=classShown, lessons=classLessons)
 
 def load_knowledge_base():
 	SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
