@@ -104,7 +104,7 @@ def main(init=False,input_type="url",filename=None):
         if type(stud) == str:
             stud = json.loads(stud)
         pprint(stud)
-        if type(stud) == dict:            
+        if type(stud) == dict:          
             tmptool = min([check_tools(answer['cooking tools'],stud['cooking tools']), answer['max']['cooking tools']])/float(answer['max']['cooking tools'])
             scores['cooking tools'] += tmptool
             tmpmeths = min([check_tools(answer['cooking methods'],stud['cooking methods']), answer['max']['cooking methods']])/float(answer['max']['cooking methods'])

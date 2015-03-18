@@ -1,21 +1,12 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*- 
+#!/usr/bin/python
 
-from flask import Flask
-from flask import render_template, request, jsonify, make_response, Response, flash, redirect, session, url_for, g
-from flask.ext.pymongo import PyMongo
-from skeleton import config
-import os, json, sys, requests, nltk, re, string, time, random
+import sys, requests, json, nltk, re, string, pprint
 from lxml import html
 from itertools import groupby
 from fractions import Fraction
-from bson import BSON
-from bson import json_util
 
-app = Flask(__name__)
-app.config.from_object(config)
+# nltk.download()
 
-mongo = PyMongo(app)
 
 COMMANDS = [
 	"bake", "baste", "batter", "beat", "blend", "boil", "braise", "break", "broil", "brush", "burn",
@@ -52,26 +43,9 @@ TOOLS = [
 	"zester"
 ]
 
-@app.route('/index', methods=['GET'])
-def welcome():
-	SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
-	json_url = os.path.join(SITE_ROOT, "static", "kb.json")
-	with open(json_url) as json_file:
-	    json_data = json.load(json_file)
+url = sys.argv[1]
 
-	return render_template('index.html')
-
-
-@app.route('/store_recipe', methods=['POST'])
-def store_recipe():
-
-
-	#url = request.form['recipe_url']
-	data = json.loads(request.data.decode('utf8'))
-	url = data['recipe_url']
-	print url
-	
-
+def scrape_recipe(url):
 	page = requests.get(url)
 	tree = html.fromstring(page.text)
 
@@ -136,79 +110,15 @@ def store_recipe():
 	data = {
 		"ingredients": ingredients,
 		"primary cooking method": methods.pop(frequencies.index(max(frequencies))),
-		"cooking method": methods,
+		"cooking methods": methods,
 		"cooking tools": tools,
-		"url": url,
-		"time": int(time.time())
+		"url": url
 	}
 
+
 	data_string = json.dumps(data)
-	new_recipe_id = mongo.db.recipes.insert(data)
-	return data_string
+	return data
 
-
-@app.route('/transform_recipe', methods=['POST'])
-def tranform_recipe():
-
-	data = json.loads(request.data.decode('utf8'))
-	url = data['recipe_url']
-	transform = data['transform']
-	#url = request.form['recipe_url']
-	#transform = request.form['transform']
-
-	recipe = mongo.db.recipes.find_one({"url": url})
-	knowledge_base = load_knowledge_base()
-
-	for ingredient_group in knowledge_base['ingredients']:
-		for ingredient in knowledge_base['ingredients'][ingredient_group]:
-			if ingredient['name'] in [x['name'] for x in recipe['ingredients']]:
-				# the ingredient exists in our knowledge base!!
-				print ingredient['name'] + " is a match!"
-				# check if the ingredient has the boolean we are transforming too
-				if ingredient.has_key(transform) and ingredient[transform] == False:
-					# we need to change this ingredient!
-					print "let's transform this"
-					#loop through ingredient group, grab first one that matches
-					new_ingredient_list = []
-					old_ingredient = ingredient['name']
-					for ingredient in knowledge_base['ingredients'][ingredient_group]:
-						if ingredient[transform] == True:
-							new_ingredient_list.append(ingredient['name'])
-
-					if len(new_ingredient_list) > 0:
-						new_ingredient = random.choice(new_ingredient_list)
-						print " old ingredient %s" % old_ingredient
-
-						# loop through recipe ingredients and update it 
-						for recipe_ingredient in recipe['ingredients']:
-							print recipe_ingredient['name']
-							if recipe_ingredient['name'] == old_ingredient:
-								recipe_ingredient['name'] = new_ingredient
-								recipe_ingredient['descriptor'] = ""
-
-
-
-	return json.dumps(recipe, sort_keys=True, indent=4, default=json_util.default)
-
-
-def load_knowledge_base():
-	SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
-	json_url = os.path.join(SITE_ROOT, "static", "kb.json")
-	with open(json_url) as json_file:
-	    json_data = json.load(json_file)
-
-	print "Number of proteins: %s" % str(len(json_data['ingredients']['proteins']))
-	print "Number of fruits-veggies: %s" % str(len(json_data['ingredients']['fruits-veggies']))
-	print "Number of oils: %s" % str(len(json_data['ingredients']['oils']))
-	print "Number of grains: %s" % str(len(json_data['ingredients']['grains']))
-	# print "Number of dairy: %s" % str(len(json_data['ingredients']['dairy']))
 	
-	return json_data
+#print scrape_recipe(url)
 
-
-# Example of ajax route that returns JSON
-@app.route('/_add_numbers')
-def add_numbers():
-    a = request.args.get('a', 0, type=int)
-    b = request.args.get('b', 0, type=int)
-    return jsonify(result=a + b)

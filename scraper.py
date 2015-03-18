@@ -1,11 +1,12 @@
 #!/usr/bin/python
 
-import sys, requests, json, nltk, re, string
+import sys, requests, json, nltk, re, string, pprint
 from lxml import html
 from itertools import groupby
 from fractions import Fraction
 
 # nltk.download()
+
 
 COMMANDS = [
 	"bake", "baste", "batter", "beat", "blend", "boil", "braise", "break", "broil", "brush", "burn",
@@ -42,129 +43,89 @@ TOOLS = [
 	"zester"
 ]
 
-url = sys.argv[1]
+#url = sys.argv[1]
 
-page = requests.get(url)
-tree = html.fromstring(page.text)
+def scrape_recipe(url):
+	page = requests.get(url)
+	tree = html.fromstring(page.text)
 
-ingredientInfo = [];
-listItems = tree.xpath("//li[@id='liIngredient']");
-for listItem in listItems:
-	ingredientInfo.append(listItem.xpath("./label/p/span/text()"))
-directions = " ".join(tree.xpath("//span[@class='plaincharacterwrap break']/text()"))
+	ingredientAmounts = tree.xpath("//span[@id='lblIngAmount']/text()")
+	ingredientNames = tree.xpath("//span[@id='lblIngName']/text()")
+	directions = " ".join(tree.xpath("//span[@class='plaincharacterwrap break']/text()"))
 
-ingredients = []
-length = len(ingredientInfo)
+	ingredients = []
+	length = len(ingredientAmounts)
 
-for i in range(0, length):
-	ingredient = {}
+	for i in range(0, length):
+		ingredient = {}
 
-	current = ingredientInfo[i]
-	name = current.pop(len(current) - 1)
-	tokens = nltk.pos_tag(nltk.word_tokenize(name.replace(",", "")))
-	numTokens = len(tokens)
-	desc = []
-	prep = []
-	prepDesc = []
-	if len(tokens) > 0:
-		print tokens
+		delimited = ingredientAmounts[i].split(" ")
+		ingredient["quantity"] = float(sum(Fraction(s) for s in delimited.pop(0).split()))
+		ingredient["measurement"] = " ".join(delimited) if len(delimited) > 0 else "none"
+
+		tokens = nltk.pos_tag(nltk.word_tokenize(ingredientNames[i].replace(",", "")))
+		numTokens = len(tokens)
+		desc = []
+		prep = []
+		prepDesc = []
+
 		for value, tag in tokens:
-			if re.search("VB(?!G)", tag) != None:
+			if re.search("VB\w", tag) != None:
 				prep.append(value)
 			elif tag == "RB":
 				prepDesc.append(value)
-			elif tag == "JJ" or tag == "VBG" or re.search("NN\w?", tag) != None or tag == "-NONE-":
+			elif tag == "JJ" or re.search("NN\w?", tag) != None or tag == "-NONE-":
 				desc.append(value)
+
 		ingredient["name"] = desc.pop(len(desc) - 1)
 		ingredient["descriptor"] = " ".join(desc) if len(desc) > 0 else "none"
 		ingredient["preparation"] = " ".join(prep) if len(prep) > 0 else "none"
 		ingredient["prep-description"] = " ".join(prepDesc) if len(prepDesc) > 0 else "none"
 
-	if len(current) > 0:
-		delimited = current[0].split(" ")
-		ingredient["quantity"] = float(sum(Fraction(s) for s in delimited.pop(0).split()))
-		ingredient["measurement"] = " ".join(delimited) if len(delimited) > 0 else "none"
+		ingredients.append(ingredient)
 
-	ingredients.append(ingredient)
+	methods = []
+	tools = []
+	exclude = set(string.punctuation)
+	directions = directions.replace("-", " ")
+	directions = "".join(char for char in directions if char not in exclude)
+	tokens = nltk.word_tokenize(directions)
+	for token in tokens:
+		token = token.lower()
+		try:
+			if COMMANDS.index(token):
+				methods.append(token)
+		except Exception:
+			pass
+		try:
+			if TOOLS.index(token):
+				tools.append(token)
+		except Exception:
+			pass
 
-methods = []
-tools = []
-exclude = set(string.punctuation)
-directions = directions.replace("-", " ")
-directions = "".join(char for char in directions if char not in exclude)
-tokens = nltk.word_tokenize(directions)
-for token in tokens:
-	token = token.lower()
-	try:
-		if COMMANDS.index(token):
-			methods.append(token)
-	except Exception:
-		pass
-	try:
-		if TOOLS.index(token):
-			tools.append(token)
-	except Exception:
-		pass
+	frequencies = [len(list(group)) for key, group in groupby(sorted(methods))]
+	methods = sorted(list(set(methods)))
+	tools = list(set(tools))
 
-frequencies = [len(list(group)) for key, group in groupby(sorted(methods))]
-methods = sorted(list(set(methods)))
-tools = list(set(tools))
-
-data = {
-	"ingredients": ingredients,
-	"primary cooking method": methods.pop(frequencies.index(max(frequencies))),
-	"cooking method": methods,
-	"cooking tools": tools
-}
-
-data_string = json.dumps(data)
-recipe = data_string
-
-knowledge_base = load_knowledge_base()
-
-for ingredient_group in knowledge_base['ingredients']:
-	for ingredient in knowledge_base['ingredients'][ingredient_group]:
-		if ingredient['name'] in [x['name'] for x in recipe['ingredients']]:
-			# the ingredient exists in our knowledge base!!
-			print ingredient['name'] + " is a match!"
-			# check if the ingredient has the boolean we are transforming too
-			if ingredient.has_key(transform) and ingredient[transform] == False:
-				# we need to change this ingredient!
-				print "let's transform this"
-				#loop through ingredient group, grab first one that matches
-				new_ingredient_list = []
-				old_ingredient = ingredient['name']
-				for ingredient in knowledge_base['ingredients'][ingredient_group]:
-					if ingredient[transform] == True:
-						new_ingredient_list.append(ingredient['name'])
-
-				if len(new_ingredient_list) > 0:
-					new_ingredient = random.choice(new_ingredient_list)
-					print " old ingredient %s" % old_ingredient
-
-					# loop through recipe ingredients and update it 
-					for recipe_ingredient in recipe['ingredients']:
-						print recipe_ingredient['name']
-						if recipe_ingredient['name'] == old_ingredient:
-							recipe_ingredient['name'] = new_ingredient
-							recipe_ingredient['descriptor'] = ""
+	data = {
+		"ingredients": ingredients,
+		"primary cooking method": methods.pop(frequencies.index(max(frequencies))),
+		"cooking methods": methods,
+		"cooking tools": tools,
+		"url": url,
+		"max": {
+			"ingredients": len(ingredients),
+			"primary cooking method": 1,
+			"cooking tools": len(tools),
+			"cooking methods": len(methods)
+		}
+	}
 
 
-	print recipe
-	return recipe
+	data_string = json.dumps(data)
+	print data
+	return data
 
-def load_knowledge_base():
-	SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
-	json_url = os.path.join(SITE_ROOT, "static", "kb.json")
-	with open(json_url) as json_file:
-	    json_data = json.load(json_file)
-
-	print "Number of proteins: %s" % str(len(json_data['ingredients']['proteins']))
-	print "Number of fruits-veggies: %s" % str(len(json_data['ingredients']['fruits-veggies']))
-	print "Number of oils: %s" % str(len(json_data['ingredients']['oils']))
-	print "Number of grains: %s" % str(len(json_data['ingredients']['grains']))
-	print "Number of dairy: %s" % str(len(json_data['ingredients']['dairy']))
 	
-	return json_data
+#print scrape_recipe(url)
 
-print('ENCODED:', data_string)
