@@ -69,6 +69,7 @@ def scrape_recipe(url):
 		prep = []
 		prepDesc = []
 		if len(tokens) > 0:
+			print tokens
 			for value, tag in tokens:
 				if re.search("VB(?!G)", tag) != None:
 					prep.append(value)
@@ -90,8 +91,9 @@ def scrape_recipe(url):
 			ingredient["quantity"] = float(sum(Fraction(s) for s in delimited.pop(0).split()))
 			ingredient["measurement"] = " ".join(delimited) if len(delimited) > 0 else "none"
 		#end if
-
-		ingredients.append(ingredient)
+		
+		if hasattr(ingredient, "name"):
+			ingredients.append(ingredient)
 	#end for
 
 	methods = []
@@ -133,5 +135,5 @@ def scrape_recipe(url):
 	return data
 
 	
-#print scrape_recipe(url)
+print scrape_recipe(url)
 
