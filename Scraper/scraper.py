@@ -76,17 +76,23 @@ def scrape_recipe(url):
 					prepDesc.append(value)
 				elif tag == "JJ" or tag == "VBG" or re.search("NN\w?", tag) != None or tag == "-NONE-":
 					desc.append(value)
+				#end if
+			#end for
+
 			ingredient["name"] = desc.pop(len(desc) - 1)
 			ingredient["descriptor"] = " ".join(desc) if len(desc) > 0 else "none"
 			ingredient["preparation"] = " ".join(prep) if len(prep) > 0 else "none"
 			ingredient["prep-description"] = " ".join(prepDesc) if len(prepDesc) > 0 else "none"
+		#end if
 
 		if len(current) > 0:
 			delimited = current[0].split(" ")
 			ingredient["quantity"] = float(sum(Fraction(s) for s in delimited.pop(0).split()))
 			ingredient["measurement"] = " ".join(delimited) if len(delimited) > 0 else "none"
+		#end if
 
 		ingredients.append(ingredient)
+	#end for
 
 	methods = []
 	tools = []
@@ -101,11 +107,14 @@ def scrape_recipe(url):
 				methods.append(token)
 		except Exception:
 			pass
+		#end try
 		try:
 			if TOOLS.index(token):
 				tools.append(token)
 		except Exception:
 			pass
+		#end try
+	#end for
 
 	frequencies = [len(list(group)) for key, group in groupby(sorted(methods))]
 	methods = sorted(list(set(methods)))
