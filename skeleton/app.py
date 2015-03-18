@@ -117,7 +117,7 @@ def store_recipe():
 			ingredient["measurement"] = " ".join(delimited) if len(delimited) > 0 else "none"
 		#end if
 
-		if hasattr(ingredient, "name"):
+		if "name" in ingredient:
 			ingredients.append(ingredient)
 	#end for
 
